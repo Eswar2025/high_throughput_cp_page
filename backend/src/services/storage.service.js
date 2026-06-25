@@ -12,6 +12,7 @@ const defaultMetrics = {
   freshFetches: 0,
   staleCacheUses: 0,
   externalApiFailures: 0,
+  rateLimitedRequests: 0,
   totalResponseTimeMs: 0,
 };
 

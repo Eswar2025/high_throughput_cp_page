@@ -1,4 +1,5 @@
 const storageService = require("../services/storage.service");
+const { sendSuccess } = require("../utils/apiResponse");
 
 function getLeaderboard(req, res) {
   const profiles = storageService.getProfiles();
@@ -26,10 +27,11 @@ function getLeaderboard(req, res) {
       };
     });
 
-  res.json({
-    success: true,
-    count: leaderboard.length,
+  sendSuccess(res, {
     data: leaderboard,
+    extra: {
+      count: leaderboard.length,
+    },
   });
 }
 

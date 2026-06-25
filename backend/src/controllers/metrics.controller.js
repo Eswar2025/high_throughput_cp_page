@@ -1,8 +1,8 @@
 const metricsService = require("../services/metrics.service");
+const { sendSuccess } = require("../utils/apiResponse");
 
 function getMetrics(req, res) {
-  res.json({
-    success: true,
+  sendSuccess(res, {
     data: metricsService.getMetrics(),
   });
 }

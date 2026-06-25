@@ -1,9 +1,10 @@
 {
-  "totalRequests": 41,
-  "cacheHits": 0,
-  "cacheMisses": 2,
-  "freshFetches": 2,
+  "totalRequests": 81,
+  "cacheHits": 30,
+  "cacheMisses": 3,
+  "freshFetches": 4,
   "staleCacheUses": 0,
   "externalApiFailures": 0,
-  "totalResponseTimeMs": 6254
+  "rateLimitedRequests": 2,
+  "totalResponseTimeMs": 17685
 }

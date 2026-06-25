@@ -59,7 +59,7 @@ async function fetchAndStoreProfile(key, source) {
 
       return {
         source: "stale_cache",
-        warning: "External API failed. Showing last available data.",
+        warning: "External API failed. Showing last available stored data.",
         data: storedProfile,
       };
     }

@@ -1,44 +1,41 @@
 const profileService = require("../services/profile.service");
+const { sendSuccess, sendError } = require("../utils/apiResponse");
 
 async function getProfile(req, res) {
-  const startedAt = Date.now();
-
   try {
     const result = await profileService.getProfile(req.params.handle);
 
-    res.json({
-      success: true,
+    sendSuccess(res, {
       source: result.source,
-      responseTimeMs: Date.now() - startedAt,
       warning: result.warning,
       data: result.data,
     });
   } catch (error) {
-    res.status(error.statusCode || 500).json({
-      success: false,
-      message: error.message || "Unable to fetch profile",
-    });
+    sendError(
+      res,
+      error.statusCode || 500,
+      error.code || "PROFILE_FETCH_FAILED",
+      error.message || "Unable to fetch profile"
+    );
   }
 }
 
 async function refreshProfile(req, res) {
-  const startedAt = Date.now();
-
   try {
     const result = await profileService.refreshProfile(req.params.handle);
 
-    res.json({
-      success: true,
+    sendSuccess(res, {
       source: result.source,
-      responseTimeMs: Date.now() - startedAt,
       warning: result.warning,
       data: result.data,
     });
   } catch (error) {
-    res.status(error.statusCode || 500).json({
-      success: false,
-      message: error.message || "Unable to refresh profile",
-    });
+    sendError(
+      res,
+      error.statusCode || 500,
+      error.code || "PROFILE_REFRESH_FAILED",
+      error.message || "Unable to refresh profile"
+    );
   }
 }
 
