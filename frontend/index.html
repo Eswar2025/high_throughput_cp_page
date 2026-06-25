@@ -12,82 +12,111 @@
       <div>
         <p class="eyebrow">CP Metrics API</p>
         <h1>High Throughput CP Page</h1>
+        <p class="subtitle">Competitive programming profile metrics with cache visibility.</p>
       </div>
-      <span class="status-pill">Prototype Shell</span>
+      <div class="topbar-actions">
+        <span id="healthBadge" class="badge badge-muted">Checking API</span>
+        <button id="loadMetricsButton" class="button button-secondary" type="button">Load Metrics</button>
+      </div>
     </header>
 
     <main class="dashboard">
       <section class="panel search-panel">
         <div>
           <h2>Profile Lookup</h2>
-          <p>Search competitive programming handles and show cached profile metrics here.</p>
+          <p>Try a Codeforces handle and watch the cache source change after repeated searches.</p>
         </div>
-        <form class="search-form">
-          <input type="text" placeholder="tourist" aria-label="Competitive programming handle" />
-          <button type="button">Search</button>
-          <button type="button" class="secondary">Refresh</button>
+
+        <form id="searchForm" class="search-form">
+          <input id="handleInput" type="text" value="tourist" placeholder="tourist" aria-label="Competitive programming handle" />
+          <button id="searchButton" class="button" type="submit">Search</button>
+          <button id="refreshButton" class="button button-secondary" type="button">Refresh</button>
         </form>
+
+        <div class="example-row" aria-label="Example handles">
+          <button class="example-button" type="button" data-handle="tourist">tourist</button>
+          <button class="example-button" type="button" data-handle="Petr">Petr</button>
+          <button class="example-button" type="button" data-handle="jiangly">jiangly</button>
+        </div>
       </section>
+
+      <div id="messageBox" class="message hidden"></div>
 
       <section class="grid">
         <article class="panel">
           <div class="section-heading">
-            <h2>Profile</h2>
-            <span class="badge">Cache Status</span>
+            <h2>Profile Summary</h2>
+            <span id="sourceBadge" class="badge badge-muted">No Search Yet</span>
           </div>
-          <div class="empty-state">Profile cards will appear after backend profile routes are added.</div>
+          <div id="summaryGrid" class="summary-grid">
+            <div class="empty-state">Search a handle to load profile summary.</div>
+          </div>
         </article>
 
         <article class="panel">
           <div class="section-heading">
             <h2>System Metrics</h2>
-            <span class="badge muted">Health Ready</span>
+            <span id="metricsUpdated" class="badge badge-muted">Waiting</span>
           </div>
-          <div class="metric-grid">
-            <div>
-              <strong>0</strong>
-              <span>Requests</span>
-            </div>
-            <div>
-              <strong>0</strong>
-              <span>Cache Hits</span>
-            </div>
-            <div>
-              <strong>0 ms</strong>
-              <span>Avg Response</span>
-            </div>
+          <div id="metricsGrid" class="metric-grid">
+            <div class="empty-state">Metrics will load from the backend.</div>
           </div>
         </article>
       </section>
 
       <section class="panel">
         <div class="section-heading">
-          <h2>Leaderboard</h2>
-          <button type="button" class="secondary">Load Leaderboard</button>
+          <h2>Platform Cards</h2>
+          <span id="platformCount" class="badge badge-muted">0 Platforms</span>
         </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Rank</th>
-              <th>Handle</th>
-              <th>Rating</th>
-              <th>Solved</th>
-              <th>Source</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td colspan="5">Leaderboard data will appear here.</td>
-            </tr>
-          </tbody>
-        </table>
+        <div id="platformCards" class="platform-grid">
+          <div class="empty-state">Platform cards will appear after a successful search.</div>
+        </div>
       </section>
 
       <section class="panel">
+        <div class="section-heading">
+          <h2>Leaderboard</h2>
+          <button id="loadLeaderboardButton" class="button button-secondary" type="button">Load Leaderboard</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Handle</th>
+                <th>Rating</th>
+                <th>Max Rating</th>
+                <th>Solved</th>
+                <th>Source</th>
+                <th>Last Updated</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboardBody">
+              <tr>
+                <td colspan="7">Leaderboard data will appear here.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel architecture-panel">
         <h2>Architecture</h2>
-        <p class="architecture-copy">
-          Vanilla frontend calls a JavaScript Express API. The first prototype exposes health checks now, then grows into profile fetching, cache status, leaderboard, and metrics endpoints.
-        </p>
+        <div class="architecture-grid">
+          <div>
+            <strong>Vanilla Frontend</strong>
+            <span>HTML, CSS, and JavaScript call the Express API directly.</span>
+          </div>
+          <div>
+            <strong>Express Backend</strong>
+            <span>Routes fetch profile data, update metrics, and serve leaderboard results.</span>
+          </div>
+          <div>
+            <strong>Cache + JSON Storage</strong>
+            <span>Repeated searches use a 300-second in-memory cache and stored profiles.</span>
+          </div>
+        </div>
       </section>
     </main>
 

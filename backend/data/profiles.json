@@ -1,52 +1,102 @@
 {
-  "tourist": {
-    "handle": "tourist",
+  "petr": {
+    "handle": "Petr",
     "platforms": [
       {
         "platform": "codeforces",
-        "handle": "tourist",
-        "rating": 3486,
-        "maxRating": 4009,
+        "handle": "Petr",
+        "rating": 3054,
+        "maxRating": 3597,
         "rank": "legendary grandmaster",
-        "maxRank": "tourist",
-        "contribution": 58,
-        "friendOfCount": 89394,
-        "solvedCount": 3015,
+        "maxRank": "legendary grandmaster",
+        "contribution": 122,
+        "friendOfCount": 13602,
+        "solvedCount": 1382,
         "source": "real_api",
-        "lastUpdated": "2026-06-25T12:27:04.667Z"
+        "lastUpdated": "2026-06-25T13:12:35.716Z"
       },
       {
         "platform": "leetcode",
-        "handle": "tourist",
-        "rating": 1594,
-        "maxRating": 2394,
+        "handle": "petr",
+        "rating": 1943,
+        "maxRating": 2043,
         "rank": "mock_rank",
         "maxRank": "mock_rank",
         "contribution": 0,
         "friendOfCount": 0,
-        "solvedCount": 154,
+        "solvedCount": 183,
         "source": "mock_data",
-        "lastUpdated": "2026-06-25T12:27:01.672Z"
+        "lastUpdated": "2026-06-25T13:12:31.615Z"
       },
       {
         "platform": "codechef",
-        "handle": "tourist",
-        "rating": 1561,
-        "maxRating": 1611,
+        "handle": "petr",
+        "rating": 1860,
+        "maxRating": 1960,
         "rank": "mock_rank",
         "maxRank": "mock_rank",
         "contribution": 0,
         "friendOfCount": 0,
-        "solvedCount": 111,
+        "solvedCount": 280,
         "source": "mock_data",
-        "lastUpdated": "2026-06-25T12:27:01.673Z"
+        "lastUpdated": "2026-06-25T13:12:31.615Z"
       }
     ],
     "summary": {
-      "bestRating": 3486,
-      "totalSolved": 3280,
+      "bestRating": 3054,
+      "totalSolved": 1845,
       "activePlatforms": 3
     },
-    "lastUpdated": "2026-06-25T12:27:04.667Z"
+    "lastUpdated": "2026-06-25T13:12:35.717Z"
+  },
+  "dineshkrishnayeturi": {
+    "handle": "dineshkrishnayeturi",
+    "platforms": [
+      {
+        "platform": "codeforces",
+        "handle": "dineshkrishnayeturi",
+        "rating": 1253,
+        "maxRating": 1320,
+        "rank": "pupil",
+        "maxRank": "pupil",
+        "contribution": 0,
+        "friendOfCount": 5,
+        "solvedCount": 101,
+        "source": "real_api",
+        "lastUpdated": "2026-06-25T13:13:19.563Z"
+      },
+      {
+        "platform": "leetcode",
+        "handle": "dineshkrishnayeturi",
+        "rating": 2161,
+        "maxRating": 2061,
+        "rank": "mock_rank",
+        "maxRank": "mock_rank",
+        "contribution": 0,
+        "friendOfCount": 0,
+        "solvedCount": 281,
+        "source": "mock_data",
+        "lastUpdated": "2026-06-25T13:13:17.543Z"
+      },
+      {
+        "platform": "codechef",
+        "handle": "dineshkrishnayeturi",
+        "rating": 1528,
+        "maxRating": 2178,
+        "rank": "mock_rank",
+        "maxRank": "mock_rank",
+        "contribution": 0,
+        "friendOfCount": 0,
+        "solvedCount": 338,
+        "source": "mock_data",
+        "lastUpdated": "2026-06-25T13:13:17.543Z"
+      }
+    ],
+    "summary": {
+      "bestRating": 2161,
+      "totalSolved": 720,
+      "activePlatforms": 3
+    },
+    "lastUpdated": "2026-06-25T13:13:19.563Z"
   }
 }
