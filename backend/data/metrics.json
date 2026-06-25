@@ -1,0 +1,9 @@
+{
+  "totalRequests": 4,
+  "cacheHits": 1,
+  "cacheMisses": 1,
+  "freshFetches": 1,
+  "staleCacheUses": 0,
+  "externalApiFailures": 0,
+  "totalResponseTimeMs": 3172
+}

@@ -1,0 +1,52 @@
+{
+  "tourist": {
+    "handle": "tourist",
+    "platforms": [
+      {
+        "platform": "codeforces",
+        "handle": "tourist",
+        "rating": 3486,
+        "maxRating": 4009,
+        "rank": "legendary grandmaster",
+        "maxRank": "tourist",
+        "contribution": 58,
+        "friendOfCount": 89394,
+        "solvedCount": 3015,
+        "source": "real_api",
+        "lastUpdated": "2026-06-25T12:27:04.667Z"
+      },
+      {
+        "platform": "leetcode",
+        "handle": "tourist",
+        "rating": 1594,
+        "maxRating": 2394,
+        "rank": "mock_rank",
+        "maxRank": "mock_rank",
+        "contribution": 0,
+        "friendOfCount": 0,
+        "solvedCount": 154,
+        "source": "mock_data",
+        "lastUpdated": "2026-06-25T12:27:01.672Z"
+      },
+      {
+        "platform": "codechef",
+        "handle": "tourist",
+        "rating": 1561,
+        "maxRating": 1611,
+        "rank": "mock_rank",
+        "maxRank": "mock_rank",
+        "contribution": 0,
+        "friendOfCount": 0,
+        "solvedCount": 111,
+        "source": "mock_data",
+        "lastUpdated": "2026-06-25T12:27:01.673Z"
+      }
+    ],
+    "summary": {
+      "bestRating": 3486,
+      "totalSolved": 3280,
+      "activePlatforms": 3
+    },
+    "lastUpdated": "2026-06-25T12:27:04.667Z"
+  }
+}

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>High Throughput CP Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">CP Metrics API</p>
+        <h1>High Throughput CP Page</h1>
+      </div>
+      <span class="status-pill">Prototype Shell</span>
+    </header>
+
+    <main class="dashboard">
+      <section class="panel search-panel">
+        <div>
+          <h2>Profile Lookup</h2>
+          <p>Search competitive programming handles and show cached profile metrics here.</p>
+        </div>
+        <form class="search-form">
+          <input type="text" placeholder="tourist" aria-label="Competitive programming handle" />
+          <button type="button">Search</button>
+          <button type="button" class="secondary">Refresh</button>
+        </form>
+      </section>
+
+      <section class="grid">
+        <article class="panel">
+          <div class="section-heading">
+            <h2>Profile</h2>
+            <span class="badge">Cache Status</span>
+          </div>
+          <div class="empty-state">Profile cards will appear after backend profile routes are added.</div>
+        </article>
+
+        <article class="panel">
+          <div class="section-heading">
+            <h2>System Metrics</h2>
+            <span class="badge muted">Health Ready</span>
+          </div>
+          <div class="metric-grid">
+            <div>
+              <strong>0</strong>
+              <span>Requests</span>
+            </div>
+            <div>
+              <strong>0</strong>
+              <span>Cache Hits</span>
+            </div>
+            <div>
+              <strong>0 ms</strong>
+              <span>Avg Response</span>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <h2>Leaderboard</h2>
+          <button type="button" class="secondary">Load Leaderboard</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Handle</th>
+              <th>Rating</th>
+              <th>Solved</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="5">Leaderboard data will appear here.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="panel">
+        <h2>Architecture</h2>
+        <p class="architecture-copy">
+          Vanilla frontend calls a JavaScript Express API. The first prototype exposes health checks now, then grows into profile fetching, cache status, leaderboard, and metrics endpoints.
+        </p>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
