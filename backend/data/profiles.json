@@ -213,7 +213,7 @@
         "friendOfCount": 1,
         "solvedCount": 31,
         "source": "real_api",
-        "lastUpdated": "2026-06-26T15:36:47.979Z"
+        "lastUpdated": "2026-06-26T18:05:16.081Z"
       },
       {
         "platform": "leetcode",
@@ -226,7 +226,7 @@
         "friendOfCount": 0,
         "solvedCount": 166,
         "source": "mock_data",
-        "lastUpdated": "2026-06-26T15:36:44.426Z"
+        "lastUpdated": "2026-06-26T18:05:11.483Z"
       },
       {
         "platform": "codechef",
@@ -239,7 +239,7 @@
         "friendOfCount": 0,
         "solvedCount": 123,
         "source": "mock_data",
-        "lastUpdated": "2026-06-26T15:36:44.426Z"
+        "lastUpdated": "2026-06-26T18:05:11.483Z"
       }
     ],
     "summary": {
@@ -247,6 +247,6 @@
       "totalSolved": 320,
       "activePlatforms": 3
     },
-    "lastUpdated": "2026-06-26T15:36:47.979Z"
+    "lastUpdated": "2026-06-26T18:05:16.081Z"
   }
 }
