@@ -3,18 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CP Metrics Hub</title>
+    <title>CP Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="app-shell">
       <aside class="sidebar" aria-label="Dashboard navigation">
-        <a class="sidebar-brand" href="#overview" aria-label="CP Metrics Hub home">
+        <a class="sidebar-brand" href="#overview" aria-label="CP Hub home">
           <span class="brand-mark">CP</span>
           <span>
-            <strong>CP Metrics Hub</strong>
-            <small>Backend demo</small>
+            <strong>CP Hub</strong>
+            <small>High-Throughput CP Dashboard</small>
           </span>
         </a>
 
@@ -29,24 +29,24 @@
         </nav>
 
         <div class="sidebar-footer">
-          <span>API Base</span>
+          <span>Local API</span>
           <strong id="apiBaseLabel">http://localhost:5003/api</strong>
         </div>
       </aside>
 
       <main class="main-content">
         <section id="overview" class="hero-section">
-          <span class="hero-kicker">High-throughput competitive programming dashboard</span>
-          <h1>CP Metrics Hub</h1>
+          <span class="hero-kicker">High-Throughput Competitive Programming Dashboard</span>
+          <h1>CP Hub</h1>
           <p class="hero-subtitle">
             Search coding handles, view cached profile metrics, and track backend performance in one dashboard.
           </p>
           <div class="status-chip-row" aria-label="Project status">
             <span id="healthBadge" class="badge badge-muted">Checking API</span>
             <span class="badge badge-redis">Redis Cache</span>
-            <span class="badge badge-fresh">Rate Limited API</span>
+            <span class="badge badge-fresh">Rate Limited</span>
             <span class="badge badge-memory">Load Tested</span>
-            <span class="badge badge-real">Codeforces Real API</span>
+            <span class="badge badge-real">Codeforces API</span>
           </div>
         </section>
 
@@ -54,29 +54,31 @@
           <div class="section-heading centered-heading">
             <div>
               <span class="section-kicker">Search</span>
-              <h2>Find a Competitive Programming Profile</h2>
+              <h2>Find a CP profile</h2>
               <p>Use a Codeforces handle to populate the profile, platform cards, leaderboard, and metrics.</p>
             </div>
           </div>
 
           <form id="searchForm" class="search-form">
-            <label class="search-control" for="handleInput">
-              <span class="search-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" role="img">
-                  <path d="M10.8 18.1a7.3 7.3 0 1 1 0-14.6 7.3 7.3 0 0 1 0 14.6Zm0-2a5.3 5.3 0 1 0 0-10.6 5.3 5.3 0 0 0 0 10.6Zm5.6.7 3.2 3.2" />
-                </svg>
-              </span>
-              <input
-                id="handleInput"
-                type="text"
-                value="tourist"
-                placeholder="Search a Codeforces handle..."
-                autocomplete="off"
-              />
-            </label>
+            <div class="search-bar-shell">
+              <label class="search-control" for="handleInput">
+                <span class="search-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" role="img">
+                    <path d="M10.8 18.1a7.3 7.3 0 1 1 0-14.6 7.3 7.3 0 0 1 0 14.6Zm0-2a5.3 5.3 0 1 0 0-10.6 5.3 5.3 0 0 0 0 10.6Zm5.6.7 3.2 3.2" />
+                  </svg>
+                </span>
+                <input
+                  id="handleInput"
+                  type="text"
+                  value="tourist"
+                  placeholder="Search a Codeforces handle..."
+                  autocomplete="off"
+                />
+              </label>
+              <button id="searchButton" class="button button-primary" type="submit">Search</button>
+            </div>
 
             <div class="search-actions">
-              <button id="searchButton" class="button button-primary" type="submit">Search</button>
               <button id="refreshButton" class="button icon-button" type="button" title="Fresh fetch from backend">
                 Refresh
               </button>
@@ -204,7 +206,7 @@
           </div>
 
           <div class="project-info-grid">
-            <details class="info-card" open>
+            <details class="info-card">
               <summary>Architecture Flow</summary>
               <div class="flow-strip" aria-label="Architecture flow">
                 <span>Browser UI</span>

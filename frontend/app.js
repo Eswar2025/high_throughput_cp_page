@@ -428,8 +428,8 @@ function showStatusMessage(result, action) {
   elements.messageBox.innerHTML = `
     <div class="message-content">
       <span>
-        ${escapeHtml(action)} <strong>${escapeHtml(handle)}</strong>
-        from ${escapeHtml(formatSource(cacheProvider))} cache provider in ${escapeHtml(responseTime)}.
+        ${escapeHtml(action)} <strong>${escapeHtml(handle)}</strong> from
+        ${escapeHtml(formatSource(cacheProvider))} cache in ${escapeHtml(responseTime)}.
       </span>
       <span class="message-badges">
         <span class="badge ${getBadgeClass(source)}">${formatSource(source)}</span>
