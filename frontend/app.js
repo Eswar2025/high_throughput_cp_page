@@ -1,8 +1,10 @@
 const API_BASE_URL = "http://localhost:5003/api";
+const RECENT_HANDLES_KEY = "cp_metrics_recent_handles";
 
 const state = {
   currentHandle: "",
   isLoading: false,
+  recentHandles: loadRecentHandles(),
 };
 
 const elements = {
@@ -11,19 +13,21 @@ const elements = {
   handleInput: document.querySelector("#handleInput"),
   searchButton: document.querySelector("#searchButton"),
   refreshButton: document.querySelector("#refreshButton"),
+  actionsDropdown: document.querySelector("#actionsDropdown"),
   loadLeaderboardButton: document.querySelector("#loadLeaderboardButton"),
   loadMetricsButton: document.querySelector("#loadMetricsButton"),
+  clearResultsButton: document.querySelector("#clearResultsButton"),
   messageBox: document.querySelector("#messageBox"),
   healthBadge: document.querySelector("#healthBadge"),
   sourceBadge: document.querySelector("#sourceBadge"),
   cacheProviderBadge: document.querySelector("#cacheProviderBadge"),
-  profileDetails: document.querySelector("#profileDetails"),
-  summaryGrid: document.querySelector("#summaryGrid"),
+  profileOverview: document.querySelector("#profileOverview"),
   platformCards: document.querySelector("#platformCards"),
   platformCount: document.querySelector("#platformCount"),
   leaderboardBody: document.querySelector("#leaderboardBody"),
   metricsGrid: document.querySelector("#metricsGrid"),
   metricsUpdated: document.querySelector("#metricsUpdated"),
+  historyList: document.querySelector("#historyList"),
   exampleButtons: document.querySelectorAll(".example-button"),
 };
 
@@ -39,11 +43,21 @@ elements.refreshButton.addEventListener("click", () => {
 });
 
 elements.loadLeaderboardButton.addEventListener("click", () => {
+  if (state.isLoading) return;
+  closeActionsMenu();
   loadLeaderboard();
 });
 
 elements.loadMetricsButton.addEventListener("click", () => {
+  if (state.isLoading) return;
+  closeActionsMenu();
   loadMetrics();
+});
+
+elements.clearResultsButton.addEventListener("click", () => {
+  if (state.isLoading) return;
+  closeActionsMenu();
+  clearResults();
 });
 
 elements.exampleButtons.forEach((button) => {
@@ -53,9 +67,24 @@ elements.exampleButtons.forEach((button) => {
   });
 });
 
+elements.historyList.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-history-handle]");
+  if (!button || state.isLoading) return;
+
+  elements.handleInput.value = button.dataset.historyHandle;
+  searchProfile();
+});
+
+document.addEventListener("click", (event) => {
+  if (!elements.actionsDropdown.contains(event.target)) {
+    closeActionsMenu();
+  }
+});
+
 initializeDashboard();
 
 async function initializeDashboard() {
+  renderHistory();
   await checkHealth();
   await Promise.all([loadLeaderboard(), loadMetrics()]);
 }
@@ -76,16 +105,14 @@ async function searchProfile() {
   const handle = getHandle();
   if (!handle) return;
 
-  setLoading(true, "Loading...");
+  setLoading(true, "Loading profile data...");
   state.currentHandle = handle;
 
   try {
     const result = await requestJson(`/profile/${encodeURIComponent(handle)}`);
     renderProfile(result);
-    showMessage(
-      `Loaded ${result.data.handle} with ${formatSource(result.source)} using ${formatSource(result.cacheProvider)} cache.`,
-      "success"
-    );
+    addRecentHandle(result.data?.handle || handle);
+    showStatusMessage(result, "Loaded");
     await Promise.all([loadLeaderboard(false), loadMetrics(false)]);
   } catch (error) {
     showError(error);
@@ -98,7 +125,7 @@ async function refreshProfile() {
   const handle = getHandle() || state.currentHandle;
   if (!handle) return;
 
-  setLoading(true, "Loading...");
+  setLoading(true, "Refreshing profile data...");
   state.currentHandle = handle;
 
   try {
@@ -106,10 +133,8 @@ async function refreshProfile() {
       method: "POST",
     });
     renderProfile(result);
-    showMessage(
-      `Refreshed ${result.data.handle} with ${formatSource(result.source)} using ${formatSource(result.cacheProvider)} cache.`,
-      "success"
-    );
+    addRecentHandle(result.data?.handle || handle);
+    showStatusMessage(result, "Refreshed");
     await Promise.all([loadLeaderboard(false), loadMetrics(false)]);
   } catch (error) {
     showError(error);
@@ -153,27 +178,48 @@ function renderProfile(result) {
   const summary = profile.summary || {};
   const platforms = profile.platforms || [];
   const lastUpdated = profile.lastUpdated || getLatestPlatformUpdate(platforms);
+  const source = result.source || "unknown";
+  const cacheProvider = result.cacheProvider || "memory";
 
-  elements.sourceBadge.textContent = formatSource(result.source);
-  elements.sourceBadge.className = `badge ${getBadgeClass(result.source)}`;
-  elements.cacheProviderBadge.textContent = formatSource(result.cacheProvider || "memory");
-  elements.cacheProviderBadge.className = `badge ${getBadgeClass(result.cacheProvider || "memory")}`;
+  elements.sourceBadge.textContent = formatSource(source);
+  elements.sourceBadge.className = `badge ${getBadgeClass(source)}`;
+  elements.cacheProviderBadge.textContent = formatSource(cacheProvider);
+  elements.cacheProviderBadge.className = `badge ${getBadgeClass(cacheProvider)}`;
 
-  elements.profileDetails.innerHTML = [
-    detailCard(profile.handle || "Unknown", "Handle"),
-    detailBadge(result.source, "Source"),
-    detailBadge(result.cacheProvider || "memory", "Cache Provider"),
-    detailCard(`${result.responseTimeMs || 0} ms`, "Response Time"),
-    detailCard(formatDate(lastUpdated), "Last Updated"),
-    result.warning ? warningBox(result.warning) : "",
-  ].join("");
+  elements.profileOverview.innerHTML = `
+    <article class="profile-card-shell">
+      <div class="profile-topline">
+        <div class="profile-handle">
+          <span class="profile-avatar">${escapeHtml(getHandleInitials(profile.handle || "CP"))}</span>
+          <div>
+            <strong>${escapeHtml(profile.handle || "Unknown")}</strong>
+            <span>Competitive programming profile</span>
+          </div>
+        </div>
+        <div class="badge-row">
+          <span class="badge ${getBadgeClass(source)}">${formatSource(source)}</span>
+          <span class="badge ${getBadgeClass(cacheProvider)}">${formatSource(cacheProvider)}</span>
+        </div>
+      </div>
 
-  elements.summaryGrid.innerHTML = [
-    statCard(formatNumber(summary.bestRating || 0), "Best Rating"),
-    statCard(formatNumber(summary.totalSolved || 0), "Total Solved"),
-    statCard(formatNumber(summary.activePlatforms || 0), "Active Platforms"),
-    statCard(`${result.responseTimeMs || 0} ms`, "Response Time"),
-  ].join("");
+      <div class="profile-main-grid">
+        ${profileMainStat(profile.handle || "Unknown", "Handle")}
+        ${profileMainStat(formatNumber(summary.bestRating || 0), "Best Rating")}
+        ${profileMainStat(formatNumber(summary.totalSolved || 0), "Total Solved")}
+        ${profileMainStat(formatNumber(summary.activePlatforms || 0), "Active Platforms")}
+      </div>
+
+      <div class="profile-mini-stats">
+        ${profileMiniBadge(source, "Source")}
+        ${profileMiniBadge(cacheProvider, "Cache Provider")}
+        ${profileMiniStat(`${result.responseTimeMs || 0} ms`, "Response Time")}
+      </div>
+
+      ${result.warning ? warningBox(result.warning) : ""}
+
+      <span class="profile-footer">Last updated: ${formatDate(lastUpdated)}</span>
+    </article>
+  `;
 
   elements.platformCount.textContent = `${platforms.length} Platform${platforms.length === 1 ? "" : "s"}`;
   elements.platformCount.className = "badge badge-muted";
@@ -209,22 +255,39 @@ function renderLeaderboard(rows) {
 
 function renderMetrics(metrics) {
   const cards = [
-    ["Total Requests", metrics.totalRequests],
-    ["Cache Hits", metrics.cacheHits],
-    ["Cache Misses", metrics.cacheMisses],
-    ["Fresh Fetches", metrics.freshFetches],
-    ["Stale Cache Uses", metrics.staleCacheUses],
-    ["External API Failures", metrics.externalApiFailures],
-    ["Rate Limited", metrics.rateLimitedRequests],
-    ["Avg Response", `${metrics.averageResponseTimeMs || 0} ms`],
+    ["Total Requests", metrics.totalRequests, ""],
+    ["Cache Hits", metrics.cacheHits, "metric-highlight"],
+    ["Cache Misses", metrics.cacheMisses, "metric-highlight"],
+    ["Fresh Fetches", metrics.freshFetches, ""],
+    ["Stale Cache Uses", metrics.staleCacheUses, ""],
+    ["External API Failures", metrics.externalApiFailures, ""],
+    ["Rate Limited", metrics.rateLimitedRequests, "metric-highlight"],
+    ["Avg Response", `${metrics.averageResponseTimeMs || 0} ms`, "metric-highlight"],
   ];
 
   elements.metricsGrid.innerHTML = cards
-    .map(([label, value]) => statCard(formatMetricValue(value), label))
+    .map(([label, value, className]) => statCard(formatMetricValue(value), label, className))
     .join("");
 
   elements.metricsUpdated.textContent = "Updated";
   elements.metricsUpdated.className = "badge badge-hit";
+}
+
+function renderHistory() {
+  if (!state.recentHandles.length) {
+    elements.historyList.innerHTML = `<div class="empty-state">Recent handles will appear after a successful search.</div>`;
+    return;
+  }
+
+  elements.historyList.innerHTML = state.recentHandles
+    .map(
+      (handle) => `
+        <button class="history-chip" type="button" data-history-handle="${escapeHtml(handle)}">
+          ${escapeHtml(handle)}
+        </button>
+      `
+    )
+    .join("");
 }
 
 function platformCard(platform) {
@@ -260,29 +323,38 @@ function platformCard(platform) {
   `;
 }
 
-function statCard(value, label) {
+function statCard(value, label, className = "") {
   return `
-    <div class="stat-card">
+    <article class="stat-card ${escapeHtml(className)}">
       <span class="stat-value">${escapeHtml(String(value))}</span>
       <span class="stat-label">${escapeHtml(label)}</span>
+    </article>
+  `;
+}
+
+function profileMainStat(value, label) {
+  return `
+    <div class="profile-main-stat">
+      <strong>${escapeHtml(String(value))}</strong>
+      <span>${escapeHtml(label)}</span>
     </div>
   `;
 }
 
-function detailCard(value, label) {
+function profileMiniStat(value, label) {
   return `
-    <div class="detail-card">
-      <span class="detail-value">${escapeHtml(String(value))}</span>
-      <span class="detail-label">${escapeHtml(label)}</span>
+    <div class="profile-mini-card">
+      <strong>${escapeHtml(String(value))}</strong>
+      <span>${escapeHtml(label)}</span>
     </div>
   `;
 }
 
-function detailBadge(source, label) {
+function profileMiniBadge(source, label) {
   return `
-    <div class="detail-card">
+    <div class="profile-mini-card">
       <span class="badge ${getBadgeClass(source)}">${formatSource(source)}</span>
-      <span class="detail-label">${escapeHtml(label)}</span>
+      <span>${escapeHtml(label)}</span>
     </div>
   `;
 }
@@ -334,12 +406,38 @@ function setLoading(isLoading, message = "") {
   elements.refreshButton.disabled = isLoading;
   elements.loadLeaderboardButton.disabled = isLoading;
   elements.loadMetricsButton.disabled = isLoading;
+  elements.clearResultsButton.disabled = isLoading;
+  elements.actionsDropdown.classList.toggle("is-disabled", isLoading);
   elements.searchButton.textContent = isLoading ? "Loading..." : "Search";
-  elements.refreshButton.textContent = isLoading ? "Loading..." : "Refresh";
+
+  if (isLoading) {
+    closeActionsMenu();
+  }
 
   if (message) {
     showMessage(message, "loading");
   }
+}
+
+function showStatusMessage(result, action) {
+  const handle = result.data?.handle || state.currentHandle || "profile";
+  const cacheProvider = result.cacheProvider || "memory";
+  const source = result.source || "unknown";
+  const responseTime = `${result.responseTimeMs || 0} ms`;
+
+  elements.messageBox.innerHTML = `
+    <div class="message-content">
+      <span>
+        ${escapeHtml(action)} <strong>${escapeHtml(handle)}</strong>
+        from ${escapeHtml(formatSource(cacheProvider))} cache provider in ${escapeHtml(responseTime)}.
+      </span>
+      <span class="message-badges">
+        <span class="badge ${getBadgeClass(source)}">${formatSource(source)}</span>
+        <span class="badge ${getBadgeClass(cacheProvider)}">${formatSource(cacheProvider)}</span>
+      </span>
+    </div>
+  `;
+  elements.messageBox.className = "message success";
 }
 
 function showError(error) {
@@ -353,6 +451,58 @@ function showError(error) {
 function showMessage(message, type = "") {
   elements.messageBox.textContent = message;
   elements.messageBox.className = `message ${type}`.trim();
+}
+
+function clearResults() {
+  state.currentHandle = "";
+  elements.handleInput.value = "";
+  elements.sourceBadge.textContent = "No Search Yet";
+  elements.sourceBadge.className = "badge badge-muted";
+  elements.cacheProviderBadge.textContent = "Cache Provider";
+  elements.cacheProviderBadge.className = "badge badge-muted";
+  elements.profileOverview.innerHTML = `<div class="empty-state">Search a handle to load the profile overview.</div>`;
+  elements.platformCount.textContent = "0 Platforms";
+  elements.platformCount.className = "badge badge-muted";
+  elements.platformCards.innerHTML = `<div class="empty-state">Platform cards will appear after a successful search.</div>`;
+  elements.leaderboardBody.innerHTML = rowMessage("Search profiles to build the leaderboard.", 8);
+  elements.metricsUpdated.textContent = "Waiting";
+  elements.metricsUpdated.className = "badge badge-muted";
+  elements.metricsGrid.innerHTML = `<div class="empty-state">Metrics will load from the backend.</div>`;
+  showMessage("Results cleared. Search a handle to load fresh dashboard data.", "success");
+}
+
+function addRecentHandle(handle) {
+  const cleanedHandle = String(handle || "").trim();
+  if (!cleanedHandle) return;
+
+  state.recentHandles = [
+    cleanedHandle,
+    ...state.recentHandles.filter((item) => item.toLowerCase() !== cleanedHandle.toLowerCase()),
+  ].slice(0, 8);
+
+  saveRecentHandles();
+  renderHistory();
+}
+
+function loadRecentHandles() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(RECENT_HANDLES_KEY) || "[]");
+    return Array.isArray(parsed) ? parsed.filter(Boolean).slice(0, 8) : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveRecentHandles() {
+  try {
+    localStorage.setItem(RECENT_HANDLES_KEY, JSON.stringify(state.recentHandles));
+  } catch (error) {
+    // Local storage is optional for the demo; the dashboard still works without it.
+  }
+}
+
+function closeActionsMenu() {
+  elements.actionsDropdown.open = false;
 }
 
 function rowMessage(message, colspan) {
@@ -413,11 +563,19 @@ function formatMetricValue(value) {
 }
 
 function getLatestPlatformUpdate(platforms) {
-  return platforms
+  const updates = platforms
     .map((platform) => platform.lastUpdated)
     .filter(Boolean)
-    .sort()
-    .at(-1);
+    .sort();
+
+  return updates[updates.length - 1];
+}
+
+function getHandleInitials(handle) {
+  return String(handle)
+    .trim()
+    .slice(0, 2)
+    .toUpperCase();
 }
 
 function getErrorMessage(error) {

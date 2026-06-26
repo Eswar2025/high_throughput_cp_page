@@ -3,185 +3,233 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>High Throughput CP Page</title>
+    <title>CP Metrics Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header class="hero">
-      <nav class="nav-row" aria-label="Dashboard status">
-        <span class="eyebrow">CP Metrics API</span>
-        <span id="healthBadge" class="badge badge-muted">Checking API</span>
-      </nav>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Dashboard navigation">
+        <a class="sidebar-brand" href="#overview" aria-label="CP Metrics Hub home">
+          <span class="brand-mark">CP</span>
+          <span>
+            <strong>CP Metrics Hub</strong>
+            <small>Backend demo</small>
+          </span>
+        </a>
 
-      <div class="hero-grid">
-        <div>
-          <h1>High Throughput CP Page</h1>
-          <p class="subtitle">
-            A backend-heavy competitive programming metrics aggregator that shows caching,
-            fallback, leaderboard, and request metrics in one vanilla JavaScript dashboard.
-          </p>
-        </div>
+        <nav class="sidebar-nav">
+          <a href="#overview">Overview</a>
+          <a href="#search">Search</a>
+          <a href="#profile">Profile</a>
+          <a href="#metrics">Metrics</a>
+          <a href="#leaderboard">Leaderboard</a>
+          <a href="#history">History</a>
+          <a href="#project-info">Project Info</a>
+        </nav>
 
-        <div class="hero-panel">
-          <span class="panel-label">Demo Backend</span>
+        <div class="sidebar-footer">
+          <span>API Base</span>
           <strong id="apiBaseLabel">http://localhost:5003/api</strong>
-          <span>Express API with Redis or memory cache fallback.</span>
         </div>
-      </div>
-    </header>
+      </aside>
 
-    <main class="dashboard">
-      <section class="panel search-panel">
-        <div class="section-copy">
-          <h2>Profile Lookup</h2>
-          <p>Search a Codeforces handle, repeat it for a cache hit, then refresh for a fresh fetch.</p>
-        </div>
-
-        <form id="searchForm" class="search-form">
-          <label class="input-group" for="handleInput">
-            <span>Handle</span>
-            <input id="handleInput" type="text" value="tourist" placeholder="tourist" autocomplete="off" />
-          </label>
-
-          <div class="button-row">
-            <button id="searchButton" class="button" type="submit">Search</button>
-            <button id="refreshButton" class="button button-secondary" type="button">Refresh</button>
-            <button id="loadLeaderboardButton" class="button button-secondary" type="button">Load Leaderboard</button>
-            <button id="loadMetricsButton" class="button button-secondary" type="button">Load Metrics</button>
+      <main class="main-content">
+        <section id="overview" class="hero-section">
+          <span class="hero-kicker">High-throughput competitive programming dashboard</span>
+          <h1>CP Metrics Hub</h1>
+          <p class="hero-subtitle">
+            Search coding handles, view cached profile metrics, and track backend performance in one dashboard.
+          </p>
+          <div class="status-chip-row" aria-label="Project status">
+            <span id="healthBadge" class="badge badge-muted">Checking API</span>
+            <span class="badge badge-redis">Redis Cache</span>
+            <span class="badge badge-fresh">Rate Limited API</span>
+            <span class="badge badge-memory">Load Tested</span>
+            <span class="badge badge-real">Codeforces Real API</span>
           </div>
-        </form>
+        </section>
 
-        <div class="example-row" aria-label="Example handles">
-          <span>Examples</span>
-          <button class="example-button" type="button" data-handle="tourist">tourist</button>
-          <button class="example-button" type="button" data-handle="Petr">Petr</button>
-          <button class="example-button" type="button" data-handle="jiangly">jiangly</button>
-        </div>
-      </section>
-
-      <div id="messageBox" class="message hidden" role="status"></div>
-
-      <section class="panel profile-panel">
-        <div class="section-heading">
-          <div>
-            <h2>Profile Result</h2>
-            <p>Current request status and cache visibility.</p>
-          </div>
-          <div class="badge-row">
-            <span id="sourceBadge" class="badge badge-muted">No Search Yet</span>
-            <span id="cacheProviderBadge" class="badge badge-muted">Cache Provider</span>
-          </div>
-        </div>
-
-        <div id="profileDetails" class="profile-details">
-          <div class="empty-state">Search a handle to load profile metadata.</div>
-        </div>
-      </section>
-
-      <section class="grid two-column">
-        <article class="panel">
-          <div class="section-heading">
+        <section id="search" class="panel search-panel">
+          <div class="section-heading centered-heading">
             <div>
-              <h2>Profile Summary</h2>
-              <p>Aggregated values across all returned platforms.</p>
+              <span class="section-kicker">Search</span>
+              <h2>Find a Competitive Programming Profile</h2>
+              <p>Use a Codeforces handle to populate the profile, platform cards, leaderboard, and metrics.</p>
             </div>
           </div>
-          <div id="summaryGrid" class="summary-grid">
-            <div class="empty-state">Summary cards will appear after search.</div>
-          </div>
-        </article>
 
-        <article class="panel">
+          <form id="searchForm" class="search-form">
+            <label class="search-control" for="handleInput">
+              <span class="search-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" role="img">
+                  <path d="M10.8 18.1a7.3 7.3 0 1 1 0-14.6 7.3 7.3 0 0 1 0 14.6Zm0-2a5.3 5.3 0 1 0 0-10.6 5.3 5.3 0 0 0 0 10.6Zm5.6.7 3.2 3.2" />
+                </svg>
+              </span>
+              <input
+                id="handleInput"
+                type="text"
+                value="tourist"
+                placeholder="Search a Codeforces handle..."
+                autocomplete="off"
+              />
+            </label>
+
+            <div class="search-actions">
+              <button id="searchButton" class="button button-primary" type="submit">Search</button>
+              <button id="refreshButton" class="button icon-button" type="button" title="Fresh fetch from backend">
+                Refresh
+              </button>
+              <details id="actionsDropdown" class="actions-dropdown">
+                <summary class="button button-secondary">Actions</summary>
+                <div class="actions-menu">
+                  <button id="loadLeaderboardButton" type="button">Load Leaderboard</button>
+                  <button id="loadMetricsButton" type="button">Load Metrics</button>
+                  <button id="clearResultsButton" type="button">Clear Results</button>
+                </div>
+              </details>
+            </div>
+          </form>
+
+          <div class="example-row" aria-label="Example handles">
+            <span>Try</span>
+            <button class="example-button" type="button" data-handle="tourist">tourist</button>
+            <button class="example-button" type="button" data-handle="Petr">Petr</button>
+            <button class="example-button" type="button" data-handle="jiangly">jiangly</button>
+          </div>
+
+          <p class="demo-note">
+            Demo: Search tourist once for cache miss, search again for cache hit, then refresh for fresh fetch.
+          </p>
+        </section>
+
+        <div id="messageBox" class="message hidden" role="status"></div>
+
+        <section id="history" class="panel history-panel">
+          <div class="section-heading compact-heading">
+            <div>
+              <span class="section-kicker">History</span>
+              <h2>Recent Searches</h2>
+            </div>
+          </div>
+          <div id="historyList" class="history-list">
+            <div class="empty-state">Recent handles will appear after a successful search.</div>
+          </div>
+        </section>
+
+        <section id="profile" class="panel profile-overview-panel">
           <div class="section-heading">
             <div>
+              <span class="section-kicker">Profile</span>
+              <h2>Profile Overview</h2>
+              <p>Merged profile summary with request source, cache provider, and response time.</p>
+            </div>
+            <div class="badge-row">
+              <span id="sourceBadge" class="badge badge-muted">No Search Yet</span>
+              <span id="cacheProviderBadge" class="badge badge-muted">Cache Provider</span>
+            </div>
+          </div>
+
+          <div id="profileOverview" class="profile-overview">
+            <div class="empty-state">Search a handle to load the profile overview.</div>
+          </div>
+        </section>
+
+        <section id="metrics" class="panel metrics-panel">
+          <div class="section-heading">
+            <div>
+              <span class="section-kicker">Backend Metrics</span>
               <h2>System Metrics</h2>
-              <p>Backend counters from the metrics endpoint.</p>
+              <p>Live counters from the Express metrics endpoint.</p>
             </div>
             <span id="metricsUpdated" class="badge badge-muted">Waiting</span>
           </div>
           <div id="metricsGrid" class="metric-grid">
             <div class="empty-state">Metrics will load from the backend.</div>
           </div>
-        </article>
-      </section>
+        </section>
 
-      <section class="panel">
-        <div class="section-heading">
-          <div>
-            <h2>Platform Cards</h2>
-            <p>Real Codeforces data plus clearly marked mock adapters.</p>
+        <section id="platforms" class="panel">
+          <div class="section-heading">
+            <div>
+              <span class="section-kicker">Platforms</span>
+              <h2>Platform Cards</h2>
+              <p>Real Codeforces data plus clearly marked mock adapters.</p>
+            </div>
+            <span id="platformCount" class="badge badge-muted">0 Platforms</span>
           </div>
-          <span id="platformCount" class="badge badge-muted">0 Platforms</span>
-        </div>
-        <div id="platformCards" class="platform-grid">
-          <div class="empty-state">Platform cards will appear after a successful search.</div>
-        </div>
-      </section>
+          <div id="platformCards" class="platform-grid">
+            <div class="empty-state">Platform cards will appear after a successful search.</div>
+          </div>
+        </section>
 
-      <section class="panel">
-        <div class="section-heading">
-          <div>
-            <h2>Leaderboard</h2>
-            <p>Generated from profiles saved in JSON storage.</p>
+        <section id="leaderboard" class="panel">
+          <div class="section-heading">
+            <div>
+              <span class="section-kicker">Ranking</span>
+              <h2>Leaderboard</h2>
+              <p>Generated from profiles saved in JSON storage.</p>
+            </div>
           </div>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Rank</th>
-                <th>Handle</th>
-                <th>Rating</th>
-                <th>Max Rating</th>
-                <th>Solved</th>
-                <th>Total Solved</th>
-                <th>Source</th>
-                <th>Last Updated</th>
-              </tr>
-            </thead>
-            <tbody id="leaderboardBody">
-              <tr>
-                <td colspan="8">Search profiles to build the leaderboard.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Handle</th>
+                  <th>Rating</th>
+                  <th>Max Rating</th>
+                  <th>Solved</th>
+                  <th>Total Solved</th>
+                  <th>Source</th>
+                  <th>Last Updated</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboardBody">
+                <tr>
+                  <td colspan="8">Search profiles to build the leaderboard.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-      <section class="panel explanation-panel">
-        <div class="section-heading">
-          <div>
-            <h2>Architecture</h2>
-            <p>Short path of a profile request through the prototype.</p>
+        <section id="project-info" class="project-info-section">
+          <div class="section-heading">
+            <div>
+              <span class="section-kicker">Explainability</span>
+              <h2>Project Info</h2>
+              <p>Secondary notes for interviews and architecture walkthroughs.</p>
+            </div>
           </div>
-        </div>
-        <div class="flow-strip" aria-label="Architecture flow">
-          <span>Browser UI</span>
-          <span>Express API</span>
-          <span>Cache</span>
-          <span>Codeforces API</span>
-          <span>JSON Storage</span>
-          <span>Dashboard</span>
-        </div>
-      </section>
 
-      <section class="panel">
-        <div class="section-heading">
-          <div>
-            <h2>Interview Talking Points</h2>
-            <p>Use these as quick explanations during a project walkthrough.</p>
+          <div class="project-info-grid">
+            <details class="info-card" open>
+              <summary>Architecture Flow</summary>
+              <div class="flow-strip" aria-label="Architecture flow">
+                <span>Browser UI</span>
+                <span>Express API</span>
+                <span>Cache</span>
+                <span>Codeforces API</span>
+                <span>JSON Storage</span>
+                <span>Dashboard</span>
+              </div>
+            </details>
+
+            <details class="info-card">
+              <summary>Interview Talking Points</summary>
+              <div class="talking-grid">
+                <div>Redis cache reduces repeated external calls.</div>
+                <div>TTL balances freshness and speed.</div>
+                <div>Promise.allSettled prevents one platform failure from breaking the response.</div>
+                <div>Stale cache fallback improves availability.</div>
+                <div>Rate limiter protects backend.</div>
+              </div>
+            </details>
           </div>
-        </div>
-        <div class="talking-grid">
-          <div>Redis cache reduces repeated external calls.</div>
-          <div>TTL balances freshness and speed.</div>
-          <div>Promise.allSettled prevents one platform failure from breaking the response.</div>
-          <div>Stale cache fallback improves availability.</div>
-          <div>Rate limiter protects backend.</div>
-        </div>
-      </section>
-    </main>
+        </section>
+      </main>
+    </div>
 
     <script src="app.js"></script>
   </body>
