@@ -74,6 +74,15 @@
                 aria-label="Codeforces handle"
                 autocomplete="off"
               />
+              <label class="platform-select-control">
+                <span class="sr-only">Search platform</span>
+                <select id="platformSelect" aria-label="Search platform">
+                  <option value="codeforces" selected>Codeforces</option>
+                  <option value="leetcode">LeetCode</option>
+                  <option value="codechef">CodeChef</option>
+                  <option value="all">All Platforms</option>
+                </select>
+              </label>
               <button
                 id="refreshButton"
                 class="search-segment refresh-submit"
@@ -97,7 +106,7 @@
             </details>
           </form>
 
-          <p class="search-note">
+          <p id="platformContextNote" class="search-note">
             Use a Codeforces handle to populate the profile, platform cards, leaderboard, and metrics.
           </p>
 
@@ -130,10 +139,6 @@
               <h2>Profile Overview</h2>
               <p>Merged profile summary with request source, cache provider, and response time.</p>
             </div>
-            <div class="badge-row">
-              <span id="sourceBadge" class="badge badge-muted">No Search Yet</span>
-              <span id="cacheProviderBadge" class="badge badge-muted">Cache Provider</span>
-            </div>
           </div>
 
           <div id="profileOverview" class="profile-overview">
@@ -146,9 +151,22 @@
             <div>
               <span class="section-kicker">Backend Metrics</span>
               <h2>System Metrics</h2>
-              <p>Live counters from the Express metrics endpoint.</p>
             </div>
-            <span id="metricsUpdated" class="badge badge-muted">Waiting</span>
+            <div class="section-heading-actions">
+              <span id="metricsUpdated" class="badge badge-muted">Waiting</span>
+              <button
+                id="metricsToggle"
+                class="section-toggle"
+                type="button"
+                aria-expanded="true"
+                aria-controls="metricsGrid"
+              >
+                <span id="metricsToggleLabel">Hide Metrics</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m6 15 6-6 6 6" />
+                </svg>
+              </button>
+            </div>
           </div>
           <div id="metricsGrid" class="metric-grid">
             <div class="empty-state">Metrics will load from the backend.</div>
@@ -174,8 +192,13 @@
             <div>
               <span class="section-kicker">Ranking</span>
               <h2>Leaderboard</h2>
-              <p>Generated from profiles saved in JSON storage.</p>
             </div>
+          </div>
+          <div id="leaderboardTabs" class="filter-tabs" role="tablist" aria-label="Leaderboard platform">
+            <button class="filter-tab is-active" type="button" role="tab" aria-selected="true" data-leaderboard-platform="overall">Overall</button>
+            <button class="filter-tab" type="button" role="tab" aria-selected="false" data-leaderboard-platform="codeforces">Codeforces</button>
+            <button class="filter-tab" type="button" role="tab" aria-selected="false" data-leaderboard-platform="leetcode">LeetCode</button>
+            <button class="filter-tab" type="button" role="tab" aria-selected="false" data-leaderboard-platform="codechef">CodeChef</button>
           </div>
           <div class="table-wrap">
             <table>
@@ -205,7 +228,6 @@
             <div>
               <span class="section-kicker">Explainability</span>
               <h2>Project Info</h2>
-              <p>Secondary notes for interviews and architecture walkthroughs.</p>
             </div>
           </div>
 
@@ -219,17 +241,6 @@
                 <span>Codeforces API</span>
                 <span>JSON Storage</span>
                 <span>Dashboard</span>
-              </div>
-            </details>
-
-            <details class="info-card">
-              <summary>Interview Talking Points</summary>
-              <div class="talking-grid">
-                <div>Redis cache reduces repeated external calls.</div>
-                <div>TTL balances freshness and speed.</div>
-                <div>Promise.allSettled prevents one platform failure from breaking the response.</div>
-                <div>Stale cache fallback improves availability.</div>
-                <div>Rate limiter protects backend.</div>
               </div>
             </details>
           </div>

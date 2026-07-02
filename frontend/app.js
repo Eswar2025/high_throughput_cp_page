@@ -10,6 +10,12 @@ const state = {
   currentHandle: "",
   isLoading: false,
   recentHandles: loadRecentHandles(),
+  searchPlatform: "codeforces",
+  leaderboardPlatform: "overall",
+  overallLeaderboardRows: [],
+  searchedProfiles: new Map(),
+  currentProfileResult: null,
+  metricsExpanded: true,
 };
 
 const elements = {
@@ -17,6 +23,8 @@ const elements = {
   searchForm: document.querySelector("#searchForm"),
   handleInput: document.querySelector("#handleInput"),
   searchButton: document.querySelector("#searchButton"),
+  platformSelect: document.querySelector("#platformSelect"),
+  platformContextNote: document.querySelector("#platformContextNote"),
   refreshButton: document.querySelector("#refreshButton"),
   actionsDropdown: document.querySelector("#actionsDropdown"),
   loadLeaderboardButton: document.querySelector("#loadLeaderboardButton"),
@@ -24,14 +32,16 @@ const elements = {
   clearResultsButton: document.querySelector("#clearResultsButton"),
   messageBox: document.querySelector("#messageBox"),
   healthBadge: document.querySelector("#healthBadge"),
-  sourceBadge: document.querySelector("#sourceBadge"),
-  cacheProviderBadge: document.querySelector("#cacheProviderBadge"),
   profileOverview: document.querySelector("#profileOverview"),
   platformCards: document.querySelector("#platformCards"),
   platformCount: document.querySelector("#platformCount"),
   leaderboardBody: document.querySelector("#leaderboardBody"),
   metricsGrid: document.querySelector("#metricsGrid"),
   metricsUpdated: document.querySelector("#metricsUpdated"),
+  metricsToggle: document.querySelector("#metricsToggle"),
+  metricsToggleLabel: document.querySelector("#metricsToggleLabel"),
+  leaderboardTabs: document.querySelector("#leaderboardTabs"),
+  leaderboardTabButtons: document.querySelectorAll("[data-leaderboard-platform]"),
   historyList: document.querySelector("#historyList"),
   exampleButtons: document.querySelectorAll(".example-button"),
 };
@@ -47,6 +57,15 @@ elements.refreshButton.addEventListener("click", () => {
   refreshProfile();
 });
 
+elements.platformSelect.addEventListener("change", () => {
+  state.searchPlatform = elements.platformSelect.value;
+  updatePlatformContext();
+
+  if (state.currentProfileResult) {
+    renderPlatformCards(state.currentProfileResult.data?.platforms || []);
+  }
+});
+
 elements.loadLeaderboardButton.addEventListener("click", () => {
   if (state.isLoading) return;
   closeActionsMenu();
@@ -56,6 +75,7 @@ elements.loadLeaderboardButton.addEventListener("click", () => {
 elements.loadMetricsButton.addEventListener("click", () => {
   if (state.isLoading) return;
   closeActionsMenu();
+  setMetricsExpanded(true);
   loadMetrics();
 });
 
@@ -80,6 +100,19 @@ elements.historyList.addEventListener("click", (event) => {
   searchProfile();
 });
 
+elements.metricsToggle.addEventListener("click", () => {
+  setMetricsExpanded(!state.metricsExpanded);
+});
+
+elements.leaderboardTabs.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-leaderboard-platform]");
+  if (!button) return;
+
+  state.leaderboardPlatform = button.dataset.leaderboardPlatform;
+  updateLeaderboardTabs();
+  renderLeaderboard();
+});
+
 document.addEventListener("click", (event) => {
   if (!elements.actionsDropdown.contains(event.target)) {
     closeActionsMenu();
@@ -89,6 +122,10 @@ document.addEventListener("click", (event) => {
 initializeDashboard();
 
 async function initializeDashboard() {
+  state.searchPlatform = elements.platformSelect.value;
+  updatePlatformContext();
+  setMetricsExpanded(true);
+  updateLeaderboardTabs();
   renderHistory();
   await checkHealth();
   await Promise.all([loadLeaderboard(), loadMetrics()]);
@@ -149,15 +186,18 @@ async function refreshProfile() {
 }
 
 async function loadLeaderboard(showLoading = true) {
-  if (showLoading) {
+  if (showLoading && state.leaderboardPlatform === "overall") {
     elements.leaderboardBody.innerHTML = rowMessage("Loading...", 8);
   }
 
   try {
     const result = await requestJson("/leaderboard");
-    renderLeaderboard(result.data || []);
+    state.overallLeaderboardRows = result.data || [];
+    renderLeaderboard();
   } catch (error) {
-    elements.leaderboardBody.innerHTML = rowMessage(escapeHtml(getErrorMessage(error)), 8);
+    if (state.leaderboardPlatform === "overall") {
+      elements.leaderboardBody.innerHTML = rowMessage(escapeHtml(getErrorMessage(error)), 8);
+    }
   }
 }
 
@@ -186,10 +226,11 @@ function renderProfile(result) {
   const source = result.source || "unknown";
   const cacheProvider = result.cacheProvider || "memory";
 
-  elements.sourceBadge.textContent = formatSource(source);
-  elements.sourceBadge.className = `badge ${getBadgeClass(source)}`;
-  elements.cacheProviderBadge.textContent = formatSource(cacheProvider);
-  elements.cacheProviderBadge.className = `badge ${getBadgeClass(cacheProvider)}`;
+  state.currentProfileResult = result;
+
+  if (profile.handle) {
+    state.searchedProfiles.set(String(profile.handle).toLowerCase(), profile);
+  }
 
   elements.profileOverview.innerHTML = `
     <article class="profile-card-shell">
@@ -200,10 +241,6 @@ function renderProfile(result) {
             <strong>${escapeHtml(profile.handle || "Unknown")}</strong>
             <span>Competitive programming profile</span>
           </div>
-        </div>
-        <div class="badge-row">
-          <span class="badge ${getBadgeClass(source)}">${formatSource(source)}</span>
-          <span class="badge ${getBadgeClass(cacheProvider)}">${formatSource(cacheProvider)}</span>
         </div>
       </div>
 
@@ -228,15 +265,24 @@ function renderProfile(result) {
 
   elements.platformCount.textContent = `${platforms.length} Platform${platforms.length === 1 ? "" : "s"}`;
   elements.platformCount.className = "badge badge-muted";
+  renderPlatformCards(platforms);
 
-  elements.platformCards.innerHTML = platforms.length
-    ? platforms.map(platformCard).join("")
-    : `<div class="empty-state">No platform data returned.</div>`;
+  if (state.leaderboardPlatform !== "overall") {
+    renderLeaderboard();
+  }
 }
 
-function renderLeaderboard(rows) {
+function renderLeaderboard() {
+  const isOverall = state.leaderboardPlatform === "overall";
+  const rows = isOverall
+    ? state.overallLeaderboardRows
+    : buildPlatformLeaderboard(state.leaderboardPlatform);
+
   if (!rows.length) {
-    elements.leaderboardBody.innerHTML = rowMessage("Search profiles to build the leaderboard.", 8);
+    const message = isOverall
+      ? "Search profiles to build the leaderboard."
+      : "Search profiles to build this platform leaderboard.";
+    elements.leaderboardBody.innerHTML = rowMessage(message, 8);
     return;
   }
 
@@ -256,6 +302,37 @@ function renderLeaderboard(rows) {
       `
     )
     .join("");
+}
+
+function buildPlatformLeaderboard(platformName) {
+  const normalizedPlatform = String(platformName).toLowerCase();
+
+  return Array.from(state.searchedProfiles.values())
+    .map((profile) => {
+      const platform = (profile.platforms || []).find(
+        (item) => String(item.platform).toLowerCase() === normalizedPlatform
+      );
+
+      if (!platform) return null;
+
+      return {
+        handle: platform.handle || profile.handle,
+        rating: platform.rating || 0,
+        maxRating: platform.maxRating || 0,
+        solved: platform.solvedCount || 0,
+        totalSolved: profile.summary?.totalSolved || platform.solvedCount || 0,
+        source: platform.source || "unknown",
+        lastUpdated: platform.lastUpdated || profile.lastUpdated,
+      };
+    })
+    .filter(Boolean)
+    .sort(
+      (a, b) =>
+        b.maxRating - a.maxRating ||
+        b.solved - a.solved ||
+        String(a.handle).localeCompare(String(b.handle))
+    )
+    .map((row, index) => ({ ...row, rank: index + 1 }));
 }
 
 function renderMetrics(metrics) {
@@ -295,9 +372,19 @@ function renderHistory() {
     .join("");
 }
 
+function renderPlatformCards(platforms) {
+  elements.platformCards.innerHTML = platforms.length
+    ? platforms.map(platformCard).join("")
+    : `<div class="empty-state">No platform data returned.</div>`;
+}
+
 function platformCard(platform) {
+  const platformName = String(platform.platform || "").toLowerCase();
+  const isSelected =
+    state.searchPlatform !== "all" && platformName === state.searchPlatform;
+
   return `
-    <article class="platform-card">
+    <article class="platform-card${isSelected ? " is-context-selected" : ""}">
       <div class="platform-card-header">
         <div>
           <h3>${escapeHtml(platform.platform || "platform")}</h3>
@@ -408,6 +495,7 @@ function getHandle() {
 function setLoading(isLoading, message = "") {
   state.isLoading = isLoading;
   elements.searchButton.disabled = isLoading;
+  elements.platformSelect.disabled = isLoading;
   elements.refreshButton.disabled = isLoading;
   elements.loadLeaderboardButton.disabled = isLoading;
   elements.loadMetricsButton.disabled = isLoading;
@@ -461,16 +549,15 @@ function showMessage(message, type = "") {
 
 function clearResults() {
   state.currentHandle = "";
+  state.currentProfileResult = null;
+  state.searchedProfiles.clear();
+  state.overallLeaderboardRows = [];
   elements.handleInput.value = "";
-  elements.sourceBadge.textContent = "No Search Yet";
-  elements.sourceBadge.className = "badge badge-muted";
-  elements.cacheProviderBadge.textContent = "Cache Provider";
-  elements.cacheProviderBadge.className = "badge badge-muted";
   elements.profileOverview.innerHTML = `<div class="empty-state">Search a handle to load the profile overview.</div>`;
   elements.platformCount.textContent = "0 Platforms";
   elements.platformCount.className = "badge badge-muted";
   elements.platformCards.innerHTML = `<div class="empty-state">Platform cards will appear after a successful search.</div>`;
-  elements.leaderboardBody.innerHTML = rowMessage("Search profiles to build the leaderboard.", 8);
+  renderLeaderboard();
   elements.metricsUpdated.textContent = "Waiting";
   elements.metricsUpdated.className = "badge badge-muted";
   elements.metricsGrid.innerHTML = `<div class="empty-state">Metrics will load from the backend.</div>`;
@@ -505,6 +592,37 @@ function saveRecentHandles() {
   } catch (error) {
     // Local storage is optional for the demo; the dashboard still works without it.
   }
+}
+
+function updatePlatformContext() {
+  const messages = {
+    codeforces:
+      "Use a Codeforces handle to populate the profile, platform cards, leaderboard, and metrics.",
+    leetcode:
+      "LeetCode currently uses mock adapter data. Search still loads the existing combined profile.",
+    codechef:
+      "CodeChef currently uses mock adapter data. Search still loads the existing combined profile.",
+    all:
+      "All Platforms combines Codeforces real API data with clearly labeled LeetCode and CodeChef mock data.",
+  };
+
+  elements.platformContextNote.textContent = messages[state.searchPlatform] || messages.codeforces;
+}
+
+function setMetricsExpanded(isExpanded) {
+  state.metricsExpanded = isExpanded;
+  elements.metricsGrid.hidden = !isExpanded;
+  elements.metricsToggle.setAttribute("aria-expanded", String(isExpanded));
+  elements.metricsToggleLabel.textContent = isExpanded ? "Hide Metrics" : "Show Metrics";
+  elements.metricsToggle.classList.toggle("is-collapsed", !isExpanded);
+}
+
+function updateLeaderboardTabs() {
+  elements.leaderboardTabButtons.forEach((button) => {
+    const isActive = button.dataset.leaderboardPlatform === state.leaderboardPlatform;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+  });
 }
 
 function closeActionsMenu() {
